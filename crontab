@@ -4,6 +4,6 @@
 
 # Wir leiten auch die Ausgabe (stdout & stderr) in den Docker-Log-Stream um.
 
-0 3 \* \* \* /usr/local/bin/node /usr/src/app/run.js >> /proc/1/fd/1 2>>/proc/1/fd/2
+\* \* \* \* \* /usr/local/bin/node /usr/src/app/run.js >> /proc/1/fd/1 2>>/proc/1/fd/2
 
 # Leerzeile am Ende ist wichtig für Cron
