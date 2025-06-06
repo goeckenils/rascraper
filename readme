@@ -1,0 +1,101 @@
+# RA-Cockpit-Sync
+
+Ein automatisiertes Skript, das die neuesten Veranstaltungsdaten von einem bestimmten Promoter auf Resident Advisor (RA) abruft und sie mit einer Collection in einem Cockpit CMS synchronisiert.
+
+Das Skript holt alle zukünftigen Events, gleicht sie mit den bereits in Cockpit vorhandenen Einträgen ab und fügt nur die wirklich neuen Events hinzu. Für jedes neue Event werden Detailinformationen wie Beschreibung, Start-/Endzeit und Genres nachgeladen, um einen möglichst vollständigen Datensatz zu gewährleisten.
+
+![RA Logo](https://static.ra.co/images/logo-invert.svg)
+![Cockpit Logo](https://getcockpit.com/wp-content/uploads/2021/09/cockpit-logo-dark.svg)
+
+---
+
+## Features
+
+- **Automatischer Abruf:** Holt Events von einem spezifischen Promoter auf Resident Advisor über die inoffizielle GraphQL-API.
+- **Zweistufiger Fetch-Prozess:**
+  1.  Lädt eine Liste aller Basis-Events.
+  2.  Lädt für jedes Event detaillierte Informationen (Beschreibung, Zeiten, Genres) nach.
+- **Intelligente Synchronisation:** Vergleicht Events anhand ihrer eindeutigen RA-URL, um Duplikate zu vermeiden.
+- **Daten-Mapping:** Bereitet die von RA erhaltenen Daten (z.B. Formatierung von Datum/Zeit, Erstellung von Tag-Listen) für die Cockpit-API auf.
+- **Konfigurierbar:** Alle wichtigen Parameter wie Promoter-ID und API-Keys werden über Umgebungsvariablen gesteuert.
+- **Deployment-Ready:** Konzipiert für den Einsatz als wiederkehrender Cronjob, z.B. auf Plattformen wie Dokploy.
+
+---
+
+## Technische Übersicht
+
+- **Backend:** Node.js
+- **API-Kommunikation:** `axios` für HTTP-Anfragen an die GraphQL- (RA) und REST-APIs (Cockpit).
+- **Konfiguration:** `dotenv` zur Verwaltung von Umgebungsvariablen in der lokalen Entwicklung.
+
+---
+
+## Voraussetzungen
+
+- Node.js (v18 oder höher empfohlen)
+- Ein Cockpit CMS-Projekt mit einer konfigurierten Collection und einem API-Key.
+- Ein Git-Repository zur Anbindung an eine Deployment-Plattform.
+
+---
+
+## Lokale Einrichtung und Ausführung
+
+1.  **Repository klonen:**
+    ```bash
+    git clone https://github.com/dein-benutzername/dein-repo-name.git
+    cd dein-repo-name
+    ```
+
+2.  **Abhängigkeiten installieren:**
+    ```bash
+    npm install
+    ```
+
+3.  **Umgebungsvariablen einrichten:**
+    Erstelle eine Datei namens `.env` im Hauptverzeichnis des Projekts, indem du die `.env.example`-Datei kopierst. Befülle sie anschließend mit deinen Werten.
+
+    **.env**
+    ```
+    # Die ID des Promoters von der Resident Advisor URL (z.B. aus https://ra.co/promoters/117979)
+    RA_PROMOTER_ID="117979"
+
+    # Deine Cockpit API-Endpunkt-URL und der generierte API-Key
+    COCKPIT_API_URL="https://dein-cockpit.domain/api"
+    COCKPIT_API_KEY="DEIN-GENERIERTER-API-KEY"
+
+    # Auf "true" setzen, um einen Testlauf zu simulieren, ohne Daten zu schreiben
+    DRY_RUN="false"
+    ```
+
+4.  **Skript ausführen:**
+    ```bash
+    npm start
+    ```
+    Das Skript läuft einmal durch und gibt seinen Fortschritt im Terminal aus.
+
+---
+
+## Cockpit Collection Setup
+
+Damit das Skript die Daten korrekt speichern kann, muss deine Collection in Cockpit die folgenden Felder mit den exakten Namen und passenden Typen enthalten:
+
+| Feldname        | Cockpit-Feldtyp | Beispielwert                                         |
+|-----------------|-----------------|------------------------------------------------------|
+| `eventTitle`    | Text            | "NEED MORE SPEED // Official WAVES Aftershowparty"   |
+| `eventURL`      | Text (Url)      | "https://ra.co/events/2101352"                       |
+| `eventDate`     | Date            | "2025-06-14"                                         |
+| `startTime`     | Time            | "23:59:00"                                           |
+| `endTime`       | Time            | "08:00:00"                                           |
+| `venueName`     | Text            | "Indiego Glocksee"                                   |
+| `venueAddress`  | Text            | "Indiego Glocksee, Hannover"                         |
+| `city`          | Text            | "Hannover"                                           |
+| `country`       | Text            | "Germany"                                            |
+| `description`   | Rich Text / Wsywig | "Direkt nach dem Waves Open Air geht es weiter..." |
+| `artists`       | Repeater / JSON | ["vizionn", "DJ BTM"]                                |
+| `eventImage`    | Asset / Image   | "https://images.ra.co/..."                           |
+| `eventTags`     | Tags            | ["Trance", "Techno"]                                 |
+| `guestCount`    | Number          | 115                                                  |
+| `isSoldOut`     | Boolean         | false                                                |
+| `ticketPrice`   | Number          | null                                                 |
+
+---
